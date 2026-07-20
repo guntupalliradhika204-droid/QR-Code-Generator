@@ -1,35 +1,50 @@
+import streamlit as st
 import qrcode
 
-print("========== QR Code Generator ==========")
+st.title("========== QR Code Generator ==========")
 
-# Get text or URL from the user
-data = input("Enter text or URL: ")
+# Get text or URL
+data = st.text_input("Enter text or URL:")
 
-# Get file name from the user
-filename = input("Enter file name (without .png): ")
+# File name
+filename = st.text_input("Enter file name:")
 
-# Create QR Code object
-qr = qrcode.QRCode(
-    version=1,
-    error_correction=qrcode.constants.ERROR_CORRECT_H,
-    box_size=10,
-    border=4
-)
+if st.button("Generate QR Code"):
 
-# Add data to the QR code
-qr.add_data(data)
-qr.make(fit=True)
+    if data and filename:
 
-# Create QR image with custom colors
-img = qr.make_image(
-    fill_color="darkgreen",   # QR code color
-    back_color="white"        # Background color
-)
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4
+        )
 
-# Save the image
-img.save(f"{filename}.png")
+        qr.add_data(data)
+        qr.make(fit=True)
 
-print("\n===================================")
-print("✅ QR Code Generated Successfully!")
-print(f"📁 File Name : {filename}.png")
-print("===================================")
+        img = qr.make_image(
+            fill_color="darkgreen",
+            back_color="white"
+        )
+
+        # Convert QR image
+        img = img.get_image()
+
+        file_path = f"{filename}.png"
+        img.save(file_path)
+
+        st.success("✅ QR Code Generated Successfully!")
+
+        st.image(img, caption="Your QR Code")
+
+        with open(file_path, "rb") as file:
+            st.download_button(
+                label="Download QR Code",
+                data=file,
+                file_name=file_path,
+                mime="image/png"
+            )
+
+    else:
+        st.warning("Please enter text and file name")
